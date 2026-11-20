@@ -8,14 +8,16 @@ router.get('/coaches', wrap(async (req, res) => {
   const me = req.session.user.user_id;
   const subject = subjectFrom(req);
   const coaches = await db.query(   // R17
-    `SELECT co.coach_id, u.username, u.full_name, ur.rating, count(ch.student_id)::int AS students,
+    `SELECT co.coach_id, u.username, u.full_name, ur.rating, t.title_code, count(ch.student_id)::int AS students,
             bool_or(ch.student_id = $2) AS is_mine
      FROM coaches co
      JOIN users u ON u.user_id = co.coach_id
      JOIN user_ratings ur ON ur.user_id = co.coach_id AND ur.subject_id = co.subject_id
+     CROSS JOIN LATERAL (SELECT title_code FROM titles WHERE min_rating <= ur.rating
+                         ORDER BY min_rating DESC LIMIT 1) t
      LEFT JOIN coaching ch ON ch.coach_id = co.coach_id
      WHERE co.subject_id = $1
-     GROUP BY co.coach_id, u.username, u.full_name, ur.rating
+     GROUP BY co.coach_id, u.username, u.full_name, ur.rating, t.title_code
      ORDER BY ur.rating DESC, co.coach_id`, [subject, me]);
   const myCoaches = await db.query(
     `SELECT s.subject_name, u.username FROM coaching ch

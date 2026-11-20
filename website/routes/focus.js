@@ -37,17 +37,26 @@ router.post('/focus/start', wrap(async (req, res) => {
   res.redirect('/focus');
 }));
 
-// R16: the break puzzle - one I have not seen, close to my average rating
+// R16: the break puzzle - a random position I have not seen yet.
+// "Seen" compares the board itself (the first part of the FEN), so the same
+// position never comes back under a different puzzle_id.
 router.get('/focus/break', wrap(async (req, res) => {
   const me = req.session.user.user_id;
   const running = await runningSession(me);
   if (!running) return res.redirect('/focus');
-  const [puzzle] = await db.query(
+  let [puzzle] = await db.query(
     `SELECT p.puzzle_id, p.fen, p.theme, p.puzzle_rating
      FROM chess_puzzles p
-     WHERE NOT EXISTS (SELECT 1 FROM study_sessions ss WHERE ss.user_id = $1 AND ss.puzzle_id = p.puzzle_id)
-     ORDER BY abs(p.puzzle_rating - (SELECT avg(rating) FROM user_ratings WHERE user_id = $1)), p.puzzle_id
+     WHERE NOT EXISTS (SELECT 1
+                       FROM study_sessions ss
+                       JOIN chess_puzzles seen ON seen.puzzle_id = ss.puzzle_id
+                       WHERE ss.user_id = $1
+                         AND split_part(seen.fen, ' ', 1) = split_part(p.fen, ' ', 1))
+     ORDER BY random()
      LIMIT 1`, [me]);
+  if (!puzzle) {   // seen every position already -> any random puzzle
+    [puzzle] = await db.query('SELECT puzzle_id, fen, theme, puzzle_rating FROM chess_puzzles ORDER BY random() LIMIT 1');
+  }
   res.render('focus_break', { running, puzzle });
 }));
 

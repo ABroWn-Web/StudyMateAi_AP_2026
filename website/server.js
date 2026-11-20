@@ -39,6 +39,7 @@ app.use(require('./routes/notebook'));      // /notebook   (AI Mistake Notebook)
 app.use(require('./routes/focus'));         // /focus      (Pomodoro + chess puzzle)
 app.use(require('./routes/leaderboard'));   // /leaderboard
 app.use(require('./routes/coaches'));       // /coaches
+app.use(require('./routes/tournaments'));   // /tournaments (coming soon)
 
 // Unknown URL -> 404 page; any error -> error page (instead of crashing).
 app.use((req, res) => res.status(404).render('error', { message: 'Page not found.' }));

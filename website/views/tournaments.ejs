@@ -1,0 +1,64 @@
+<%- include('partials/header', { title: 'Tournaments' }) %>
+<% const initials = (name) => name.split(' ').filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join(''); %>
+<div class="page-head">
+  <div>
+    <h1>Tournaments <span class="soon" style="font-size:12px;vertical-align:middle">Coming soon</span></h1>
+    <p class="muted">Arena, Swiss and Knockout events on a chess clock, sponsored by the top 10 universities on StudyMate.</p>
+  </div>
+</div>
+
+<div class="card hero" style="margin-bottom:18px">
+  <div class="page-head" style="margin:0;align-items:center">
+    <div>
+      <div class="pane-title">Season 1 starts in</div>
+      <h2 style="margin:0 0 4px"><%= tournaments.list[0].name %></h2>
+      <p class="muted" style="margin:0"><%= tournaments.list[0].format %> · <%= tournaments.list[0].clock %> · sponsored by <b style="color:var(--ink)"><%= sponsors[0] ? sponsors[0].college_name : '' %></b></p>
+    </div>
+    <div class="countdown" id="countdown" data-launch="<%= new Date(tournaments.launchesAt).getTime() %>">
+      <div><b data-unit="days">0</b><span>days</span></div>
+      <div><b data-unit="hours">0</b><span>hours</span></div>
+      <div><b data-unit="minutes">0</b><span>min</span></div>
+      <div><b data-unit="seconds">0</b><span>sec</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-wide">
+  <div class="card">
+    <h2>Upcoming</h2>
+    <table>
+      <tr><th>Clock</th><th>Tournament</th><th>Starts</th><th>Sponsor</th><th></th></tr>
+      <% tournaments.list.forEach((t) => { const s = sponsors[t.sponsor]; %>
+        <tr>
+          <td class="tc"><%= t.clock %></td>
+          <td><b><%= t.name %></b><div class="small muted"><%= t.subject %> · <%= t.format %></div><div class="small prize"><%= t.prize %></div></td>
+          <td class="small"><%= t.starts %></td>
+          <td class="small"><%= s ? s.college_name : '—' %></td>
+          <td><button class="btn btn-sm" disabled title="Registration opens soon">Soon</button></td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h2>Sponsored by the top 10 universities</h2>
+      <p class="muted small" style="margin-top:-8px">Ranked live by their students' average rating.</p>
+      <% sponsors.forEach((s, i) => { %>
+        <div class="sponsor">
+          <div class="monogram"><%= initials(s.college_name) %></div>
+          <div style="flex:1"><b class="small">#<%= i + 1 %> <%= s.college_name %></b><div class="small muted"><%= s.city %> · <%= s.students %> students</div></div>
+          <b><%= s.avg_rating %></b>
+        </div>
+      <% }) %>
+    </div>
+    <div class="card">
+      <h2>Formats</h2>
+      <% tournaments.formats.forEach(([name, text]) => { %>
+        <p class="small"><b><%= name %></b>: <span class="muted"><%= text %></span></p>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<script src="/countdown.js"></script>
+<%- include('partials/footer') %>

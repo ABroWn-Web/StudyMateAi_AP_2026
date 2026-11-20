@@ -18,7 +18,7 @@ async function gradeAnswer(client, { userId, attemptId, questionId, chosen, time
   // W4: save the answer
   await client.query(
     `INSERT INTO attempt_answers (attempt_id, question_id, chosen_option_no, time_taken_ms)
-     VALUES ($1, $2, $3, $4)`, [attemptId, questionId, chosenNo, Math.max(0, Math.round(timeMs))]);
+     VALUES ($1, $2, $3, $4)`, [attemptId, questionId, chosenNo, Math.min(3600000, Math.max(0, Math.round(timeMs) || 0))]);   // 0 .. 1 hour
 
   // W5: Elo update - I "played" the question. Win = correct.
   const { rows: [me] } = await client.query(

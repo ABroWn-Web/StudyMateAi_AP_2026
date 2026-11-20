@@ -8,11 +8,11 @@
   <div class="card">
     <h2>Top students</h2>
     <table>
-      <tr><th>#</th><th>Student</th><th>College</th><th>Rating</th></tr>
+      <tr><th>#</th><th>Student</th><th>University</th><th>Rating</th></tr>
       <% students.forEach((s, i) => { %>
         <tr class="<%= s.user_id === user.user_id ? 'me' : '' %>">
           <td class="rank"><%= i + 1 %></td>
-          <td><span class="badge badge-<%= s.title_code %>"><%= s.title_code %></span> @<%= s.username %></td>
+          <td><% if (s.title_code !== 'CLUB') { %><span class="title-tag"><%= s.title_code %></span><% } %>@<%= s.username %></td>
           <td class="small muted"><%= s.college_name || '—' %></td>
           <td><b><%= s.rating %></b></td>
         </tr>
@@ -20,9 +20,9 @@
     </table>
   </div>
   <div class="card">
-    <h2>Top colleges</h2>
+    <h2>Top universities</h2>
     <table>
-      <tr><th>#</th><th>College</th><th>Students</th><th>Avg</th></tr>
+      <tr><th>#</th><th>University</th><th>Students</th><th>Avg</th></tr>
       <% colleges.forEach((c, i) => { %>
         <tr><td class="rank"><%= i + 1 %></td><td><%= c.college_name %><div class="small muted"><%= c.city %></div></td>
             <td><%= c.students %></td><td><b><%= c.avg_rating %></b></td></tr>

@@ -29,10 +29,11 @@ Demo login: **user00042@studymate.app** / **demo1234**
 | **Dashboard** | Your rating and chess title in every subject, mistakes due, focus minutes, weakest topics, recent duels. |
 | **Practice** | Adaptive: you get the unseen question closest to your rating. Win = rating up, question rating down. |
 | **Quizzes** | 10-question quizzes, plus an **AI quiz generator** that builds a quiz around your rating. Includes a full answer review. |
-| **Duels** | Challenge a rival near your rating. Same quiz, **chess clock** (Bullet 1+0, Blitz 3+2, Rapid 10+0), resign or lose on time, and a scoresheet at the end. |
+| **Duels** | **Quick pairing** tiles (1+0 / 3+2 / 10+0) or challenge a rival near your rating. Same quiz, **chess clock** (Bullet 1+0, Blitz 3+2, Rapid 10+0), resign or lose on time, and a scoresheet at the end. |
 | **Mistake notebook** | Every wrong answer, with an explanation, revised on a Leitner-box schedule (1 day → 30 days). |
 | **Focus timer** | Pomodoro 25 or 50 min. The break is a **chess puzzle** on a real board. |
-| **Leaderboard / Coaches** | Top students and colleges per subject; pick a coach (one per subject, enforced by a database trigger). |
+| **Leaderboard / Coaches** | Top students and universities per subject, with chess-style title tags (GM, IM, FM, CM); pick a coach (one per subject, enforced by a database trigger). |
+| **Tournaments** *(coming soon)* | Arena / Swiss / Knockout events with a launch countdown, sponsored by the top 10 universities (ranked live from the database). |
 
 ## Folder structure
 
@@ -40,7 +41,7 @@ Demo login: **user00042@studymate.app** / **demo1234**
 website/
 ├── server.js          starts Express, sessions, mounts the routes          (BACKEND)
 ├── db.js              PostgreSQL connection pool + transaction helper      (BACKEND)
-├── setup.sql          demo password + practice quizzes (run once)
+├── setup.sql          demo login, practice quizzes, puzzles, GM coaches + names (safe to re-run)
 ├── lib/
 │   ├── elo.js         the chess rating formula
 │   ├── grading.js     what happens when a question is answered
@@ -62,11 +63,12 @@ The ids refer to [`dbms/04_queries.sql`](../dbms/04_queries.sql).
 | `dashboard.js` | R2 ratings + titles, R11 duels, R13 (count), R14 weak topics, R15 focus | — |
 | `practice.js` | R12 next question | W3 practice attempt, W4 answer, W5 Elo, W8 notebook |
 | `quizzes.js` | R5 library, R6 questions, R7 score, R8 review | W2 AI quiz, W3 start, W4/W5/W8 per answer |
-| `duels.js` | R9 rivals, R10 scoresheet, R11 history | W6 create duel, W7 finish/resign |
+| `duels.js` | R9 rivals (also used by quick pairing), R10 scoresheet, R11 history | W6 create duel, W7 finish/resign |
 | `notebook.js` | R13 due mistakes | W9 next Leitner box |
 | `focus.js` | R15 stats, R16 puzzle | W10 start, W11 end + puzzle |
 | `leaderboard.js` | R3 students, R4 colleges | — |
 | `coaches.js` | R17 coaches | W12 join coach |
 | `study.js` | — (works on the pasted text, in `lib/studyEngine.js`) | — |
+| `tournaments.js` | top 10 universities by average rating | — (tournaments live in `lib/tournaments.js` until launch) |
 
 See [`EXPLAIN.md`](EXPLAIN.md) for a walkthrough of how everything works.

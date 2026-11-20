@@ -54,6 +54,8 @@
 | **Chess clock** | Browser JS counts your time down; each answer adds the increment (+2 s in Blitz 3+2). At 0 the form submits as a loss on time. | `public/duel.js` |
 | **Simulated rival** | The rival answers each question correctly with probability = Elo expected score (rival rating vs question rating). | `routes/duels.js` |
 | **FEN** | A one-line text format for a chess position. `public/board.js` turns it into an 8×8 board. | `public/board.js` |
+| **Quick pairing** | Like lichess: pick a time control and the app runs R9 (closest-rated rival) and starts a duel with the first result. | `routes/duels.js` |
+| **Tournaments (coming soon)** | Static list in `lib/tournaments.js`; sponsors = top 10 universities by average rating (live SQL). At launch: new tables `tournaments` and `tournament_players`. | `routes/tournaments.js` |
 | **Light / dark mode** | All colours are CSS variables; `data-theme="dark"` swaps them. The choice is remembered in `localStorage`. | `public/style.css`, header |
 
 ## 5. The Study Workspace "AI": five simple rules (`lib/studyEngine.js`)
@@ -82,7 +84,8 @@
 12. **How does the duel know you ran out of time?** `public/duel.js` sets `timed_out=1` and submits; the server records `termination = 'TIMEOUT'`.
 13. **Is user-pasted text safe?** Yes. It is HTML-escaped before display (`highlight()` and `<%= %>`), so a pasted `<script>` is just text.
 14. **What's in `public/` vs `views/`?** `views` are templates the *server* fills in; `public` files are sent to the *browser* as they are.
-15. **How would you scale it?** Add indexes for the slow queries (see the DBMS part), keep sessions in the database or Redis instead of memory, and run several Node processes.
+15. **Why are tournaments not in the database yet?** They're a coming-soon feature, so their details live in a small config file. At launch we'd add `tournaments(tournament_id, name, subject_id, format, clock, starts_at, sponsor_college_id)` and `tournament_players(tournament_id, user_id, score)` (one row per player per event, 1:N on both sides).
+16. **How would you scale it?** Add indexes for the slow queries (see the DBMS part), keep sessions in the database or Redis instead of memory, and run several Node processes.
 
 ## 7. Two-minute demo script
 

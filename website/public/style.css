@@ -243,3 +243,33 @@ details summary { cursor: pointer; color: var(--accent); font-weight: 600; margi
 .history-item:hover { background: var(--accent-soft); }
 .history-item small { display: block; color: var(--muted); }
 mark { background: linear-gradient(transparent 60%, var(--accent-soft) 60%); color: inherit; padding: 0 1px; }   /* highlighter pen */
+
+/* ---------- 15. chess-site touches ---------- */
+/* chess.com-style title tag in front of a name: GM, IM, FM, CM */
+.title-tag {
+  display: inline-block; background: #9b2c2c; color: #fff; font-size: 11px; font-weight: 800;
+  padding: 1px 5px; border-radius: 3px; margin-right: 6px; letter-spacing: .02em; vertical-align: 1px;
+}
+/* lichess-style quick pairing tiles */
+.pairing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pairing button {
+  width: 100%; padding: 22px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  color: var(--ink); font: inherit; cursor: pointer; transition: border-color .15s, transform .1s;
+}
+.pairing button:hover { border-color: var(--accent); transform: translateY(-2px); }
+.pairing b { display: block; font-family: var(--serif); font-size: 30px; font-weight: 600; }
+.pairing span { color: var(--muted); font-size: 13px; }
+.soon { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 999px; margin-left: auto; }
+
+/* tournaments */
+.countdown { display: flex; gap: 12px; }
+.countdown div { text-align: center; min-width: 70px; padding: 10px 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.countdown b { display: block; font-family: var(--serif); font-size: 32px; font-variant-numeric: tabular-nums; }
+.countdown span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.tc { font-family: var(--serif); font-size: 22px; font-weight: 600; white-space: nowrap; }
+.sponsor { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sponsor:last-child { border-bottom: 0; }
+.monogram { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--ink); color: var(--bg); font-family: var(--serif); font-weight: 700; flex-shrink: 0; }
+.prize { color: var(--gold); font-weight: 600; }
+.grid-wide { grid-template-columns: 2fr 1fr; align-items: start; }
+@media (max-width: 1000px) { .grid-wide { grid-template-columns: 1fr; } }

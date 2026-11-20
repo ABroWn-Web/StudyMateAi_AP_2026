@@ -3,14 +3,27 @@
   <div><h1>Duels</h1><p class="muted">Same quiz, two players, one chess clock. You play White.</p></div>
 </div>
 <%- include('partials/tabs') %>
+<div class="card" style="margin-bottom:18px">
+  <h2>Quick pairing</h2>
+  <p class="muted small" style="margin-top:-8px">Pick a time control and you are paired with the closest-rated rival in this subject.</p>
+  <div class="pairing">
+    <% [['bullet', '1+0', 'Bullet'], ['blitz', '3+2', 'Blitz'], ['rapid', '10+0', 'Rapid']].forEach(([key, tc, name]) => { %>
+      <form method="POST" action="/duels/quick">
+        <input type="hidden" name="subject" value="<%= subject %>">
+        <input type="hidden" name="clock" value="<%= key %>">
+        <button><b><%= tc %></b><span><%= name %></span></button>
+      </form>
+    <% }) %>
+  </div>
+</div>
 <div class="grid grid-2">
   <div class="card">
-    <h2>Rivals near your rating</h2>
+    <h2>Challenge a rival</h2>
     <table>
       <tr><th>Player</th><th>Rating</th><th>Clock</th><th></th></tr>
       <% rivals.forEach((r) => { %>
         <tr>
-          <td><b>@<%= r.username %></b><div class="small muted">±<%= r.gap %></div></td>
+          <td><b><% if (r.title_code !== 'CLUB') { %><span class="title-tag"><%= r.title_code %></span><% } %>@<%= r.username %></b><div class="small muted">±<%= r.gap %></div></td>
           <td><%= r.rating %></td>
           <td colspan="2">
             <form method="POST" action="/duels/challenge" style="display:flex;gap:6px">

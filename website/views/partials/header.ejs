@@ -24,13 +24,13 @@
          ['Study',     [['/study', '✎', 'Workspace'], ['/dashboard', '◧', 'Dashboard']]],
          ['Train',     [['/practice', '♟', 'Practice'], ['/quizzes', '❏', 'Quizzes'], ['/duels', '♞', 'Duels']]],
          ['Review',    [['/notebook', '✓', 'Mistake notebook'], ['/focus', '◷', 'Focus timer']]],
-         ['Community', [['/leaderboard', '♛', 'Leaderboard'], ['/coaches', '♗', 'Coaches']]],
+         ['Community', [['/leaderboard', '♛', 'Leaderboard'], ['/coaches', '♗', 'Coaches'], ['/tournaments', '♜', 'Tournaments', 'soon']]],
        ]; %>
     <% groups.forEach(([group, links]) => { %>
       <div class="nav-group"><%= group %></div>
-      <% links.forEach(([href, glyph, label]) => {
+      <% links.forEach(([href, glyph, label, soon]) => {
            const active = path.startsWith(href) || (href === '/quizzes' && path.startsWith('/attempts')); %>
-        <a class="nav-link <%= active ? 'active' : '' %>" href="<%= href %>"><span class="glyph"><%= glyph %></span><%= label %></a>
+        <a class="nav-link <%= active ? 'active' : '' %>" href="<%= href %>"><span class="glyph"><%= glyph %></span><%= label %><% if (soon) { %><span class="soon">Soon</span><% } %></a>
       <% }) %>
     <% }) %>
     <div class="sidebar-foot">

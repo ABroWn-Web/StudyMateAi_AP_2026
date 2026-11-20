@@ -14,15 +14,7 @@ router.get('/duels', wrap(async (req, res) => {
   const me = req.session.user.user_id;
   const subject = subjectFrom(req);
   // R9: rivals closest to my rating (within +-100), like chess matchmaking
-  const rivals = await db.query(
-    `SELECT u.user_id, u.username, other.rating, abs(other.rating - mine.rating) AS gap
-     FROM user_ratings mine
-     JOIN user_ratings other ON other.subject_id = mine.subject_id AND other.user_id <> mine.user_id
-                            AND other.rating BETWEEN mine.rating - 100 AND mine.rating + 100
-     JOIN users u ON u.user_id = other.user_id
-     WHERE mine.user_id = $1 AND mine.subject_id = $2
-     ORDER BY gap, u.user_id
-     LIMIT 6`, [me, subject]);
+  const rivals = await findRivals(me, subject, 6);
   // R11: my last 10 finished duels
   const history = await db.query(
     `SELECT d.duel_id, d.ended_at, me.color, opp_user.username AS opponent, d.result, d.termination, me.rating_change
@@ -37,19 +29,51 @@ router.get('/duels', wrap(async (req, res) => {
   res.render('duels', { subjects: await getSubjects(), subject, rivals, history });
 }));
 
-// W6: create the duel, one attempt per player (same quiz), both players with their rating
+// R9 as a function: the players closest to my rating in a subject (with their chess title)
+function findRivals(me, subject, howMany) {
+  return db.query(
+    `SELECT u.user_id, u.username, other.rating, abs(other.rating - mine.rating) AS gap, t.title_code
+     FROM user_ratings mine
+     JOIN user_ratings other ON other.subject_id = mine.subject_id AND other.user_id <> mine.user_id
+                            AND other.rating BETWEEN mine.rating - 100 AND mine.rating + 100
+     JOIN users u ON u.user_id = other.user_id
+     CROSS JOIN LATERAL (SELECT title_code FROM titles WHERE min_rating <= other.rating
+                         ORDER BY min_rating DESC LIMIT 1) t
+     WHERE mine.user_id = $1 AND mine.subject_id = $2
+     ORDER BY gap, u.user_id
+     LIMIT $3`, [me, subject, howMany]);
+}
+
+// Challenge button: I pick the rival
 router.post('/duels/challenge', wrap(async (req, res) => {
+  const duelId = await createDuel(req.session.user.user_id, req.body.rival_id, subjectFrom(req), req.body.clock);
+  res.redirect(`/duels/${duelId}/play`);
+}));
+
+// Quick pairing (like lichess): the app picks the closest-rated rival for me
+router.post('/duels/quick', wrap(async (req, res) => {
   const me = req.session.user.user_id;
   const subject = subjectFrom(req);
-  const [base, inc] = CLOCKS[req.body.clock] || CLOCKS.blitz;
-  const duelId = await db.transaction(async (client) => {
+  const [rival] = await findRivals(me, subject, 1);
+  if (!rival) {
+    flash(req, 'error', 'No rival near your rating right now. Try another subject.');
+    return res.redirect('/duels?subject=' + subject);
+  }
+  const duelId = await createDuel(me, rival.user_id, subject, req.body.clock);
+  res.redirect(`/duels/${duelId}/play`);
+}));
+
+// W6: create the duel, one attempt per player (same quiz), both players with their rating
+async function createDuel(me, rivalId, subject, clock) {
+  const [base, inc] = CLOCKS[clock] || CLOCKS.blitz;
+  return db.transaction(async (client) => {
     const { rows: [quiz] } = await client.query(
       `SELECT q.quiz_id FROM quizzes q
        WHERE q.subject_id = $1 AND EXISTS (SELECT 1 FROM quiz_questions qq WHERE qq.quiz_id = q.quiz_id)
        ORDER BY random() LIMIT 1`, [subject]);
     const { rows: [duel] } = await client.query(
       'INSERT INTO duels (base_seconds, increment_seconds) VALUES ($1, $2) RETURNING duel_id', [base, inc]);
-    for (const [color, userId] of [['WHITE', me], ['BLACK', req.body.rival_id]]) {
+    for (const [color, userId] of [['WHITE', me], ['BLACK', rivalId]]) {
       const { rows: [attempt] } = await client.query(
         'INSERT INTO quiz_attempts (quiz_id, user_id) VALUES ($1, $2) RETURNING attempt_id', [quiz.quiz_id, userId]);
       await client.query(
@@ -59,8 +83,7 @@ router.post('/duels/challenge', wrap(async (req, res) => {
     }
     return duel.duel_id;
   });
-  res.redirect(`/duels/${duelId}/play`);
-}));
+}
 
 // Load a duel with both players (and check that I am in it)
 async function loadDuel(duelId, me) {
@@ -111,7 +134,7 @@ router.post('/duels/:id/finish', wrap(async (req, res) => {
     for (const q of questions) {
       // my answer (empty if I never reached the question)
       const chosen = req.body['q' + q.question_id] ? parseInt(req.body['q' + q.question_id], 10) : null;
-      const ms = parseInt(req.body['t' + q.question_id], 10) || 0;
+      const ms = Math.min(3600000, Math.max(0, parseInt(req.body['t' + q.question_id], 10) || 0));   // 0 .. 1 hour
       if (chosen === q.correct_no) myScore++;
       await client.query(
         'INSERT INTO attempt_answers (attempt_id, question_id, chosen_option_no, time_taken_ms) VALUES ($1, $2, $3, $4)',
