@@ -1,0 +1,33 @@
+<%- include('partials/header', { title: 'Leaderboard' }) %>
+<div class="page-head">
+  <div><h1>Leaderboard</h1><p class="muted">Chess-style ratings and titles: CM 1600 · FM 1800 · IM 2000 · GM 2200</p></div>
+  <div class="card" style="padding:12px 18px"><span class="muted small">Your rank</span> <b class="big">#<%= me.rank %></b> <span class="muted">(<%= me.rating %>)</span></div>
+</div>
+<%- include('partials/tabs') %>
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Top students</h2>
+    <table>
+      <tr><th>#</th><th>Student</th><th>College</th><th>Rating</th></tr>
+      <% students.forEach((s, i) => { %>
+        <tr class="<%= s.user_id === user.user_id ? 'me' : '' %>">
+          <td class="rank"><%= i + 1 %></td>
+          <td><span class="badge badge-<%= s.title_code %>"><%= s.title_code %></span> @<%= s.username %></td>
+          <td class="small muted"><%= s.college_name || '—' %></td>
+          <td><b><%= s.rating %></b></td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Top colleges</h2>
+    <table>
+      <tr><th>#</th><th>College</th><th>Students</th><th>Avg</th></tr>
+      <% colleges.forEach((c, i) => { %>
+        <tr><td class="rank"><%= i + 1 %></td><td><%= c.college_name %><div class="small muted"><%= c.city %></div></td>
+            <td><%= c.students %></td><td><b><%= c.avg_rating %></b></td></tr>
+      <% }) %>
+    </table>
+  </div>
+</div>
+<%- include('partials/footer') %>

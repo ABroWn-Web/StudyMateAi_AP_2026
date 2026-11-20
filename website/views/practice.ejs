@@ -1,0 +1,50 @@
+<%- include('partials/header', { title: 'Practice' }) %>
+<div class="page-head">
+  <div><h1>Adaptive practice</h1><p class="muted">Every question is an opponent with its own rating. Beat it and your rating goes up.</p></div>
+</div>
+<%- include('partials/tabs') %>
+
+<% if (last) { %>
+  <div class="flash flash-<%= last.correct ? 'success' : 'error' %>">
+    <%= last.correct ? '✓ Correct!' : '✗ Not quite.' %>
+    Rating <%= last.change >= 0 ? '+' : '' %><%= last.change %> → <%= last.newRating %>.
+    <% if (!last.correct) { %> The answer was “<%= last.correctText %>”. Saved to your Mistake Notebook.<% } %>
+  </div>
+<% } %>
+
+<% if (!question) { %>
+  <div class="card"><h2>You have answered every question in this subject.</h2></div>
+<% } else { %>
+  <div class="grid grid-3">
+    <div class="card span-2">
+      <div class="small muted"><%= question.topic_name %> · Question #<%= question.question_id %></div>
+      <div class="question"><%= question.question_text %></div>
+      <form method="POST" action="/practice/answer">
+        <input type="hidden" name="question_id" value="<%= question.question_id %>">
+        <input type="hidden" name="subject" value="<%= subject %>">
+        <input type="hidden" name="shown_at" value="<%= shownAt %>">
+        <div class="options">
+          <% options.forEach((o) => { %>
+            <label class="option"><input type="radio" name="option" value="<%= o.option_no %>" required><span><%= o.option_text %></span></label>
+          <% }) %>
+        </div>
+        <br>
+        <button class="btn btn-primary">Submit answer</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>The matchup</h2>
+      <div class="versus">
+        <div class="side"><div class="small muted">You</div><div class="big"><%= mine.rating %></div><div class="small"><%= mine.title_name %></div></div>
+        <div class="vs">VS</div>
+        <div class="side"><div class="small muted">Question</div><div class="big"><%= question.question_rating %></div><div class="small">difficulty</div></div>
+      </div>
+      <div style="margin-top:18px">
+        <div style="display:flex;justify-content:space-between"><span>Your chance to win</span><b><%= winChance %>%</b></div>
+        <div class="progress"><span style="width:<%= winChance %>%"></span></div>
+        <p class="small muted">Elo expected score: 1 / (1 + 10<sup>(question − you) / 400</sup>). We always pick the closest-rated unseen question, so every game is fair.</p>
+      </div>
+    </div>
+  </div>
+<% } %>
+<%- include('partials/footer') %>

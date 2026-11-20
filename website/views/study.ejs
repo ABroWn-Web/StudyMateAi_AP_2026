@@ -1,0 +1,131 @@
+<%- include('partials/header', { title: 'Workspace' }) %>
+<div class="page-head">
+  <div>
+    <h1><%= current ? current.title : 'Study workspace' %></h1>
+    <p class="muted"><%= result ? `${result.sentenceCount} sentences · ${result.wordCount} words · ${result.concepts.length} key concepts`
+                                 : 'Paste your notes and get a summary, key concepts, flashcards and a practice quiz.' %></p>
+  </div>
+  <% if (subjectId) { %><a class="btn" href="/practice?subject=<%= subjectId %>">Test yourself in the question bank →</a><% } %>
+</div>
+
+<div class="workspace">
+  <!-- LEFT: study material -->
+  <div class="stack">
+    <div class="card">
+      <div class="pane-title">Study material</div>
+      <form method="POST" action="/study">
+        <textarea name="text" placeholder="Paste your notes here (at least 3 sentences)…"><%= current ? current.text : '' %></textarea>
+        <br><br>
+        <button class="btn btn-primary btn-block">Generate study kit</button>
+      </form>
+      <div class="pane-title" style="margin-top:20px">Or pick a sample topic</div>
+      <div class="chips">
+        <% Object.entries(samples).forEach(([key, s]) => { %>
+          <a class="chip" href="/study?sample=<%= key %>"><%= s.title %></a>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE: mode switcher + output cards -->
+  <div>
+    <% if (!result) { %>
+      <div class="card">
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li><b>Paste notes</b> or pick a sample topic on the left.</li>
+          <li><b>StudyMate finds the key concepts</b>: the terms your notes define and repeat most.</li>
+          <li><b>It builds your study kit</b>: a 3-sentence summary, flashcards and a quiz with instant feedback.</li>
+          <li><b>Click any concept</b> and the teacher panel explains it step by step from your own notes.</li>
+        </ol>
+      </div>
+    <% } else { const terms = result.concepts.map((c) => c.term); %>
+      <div class="tabs">
+        <button class="tab active" data-mode="summary">Summary</button>
+        <button class="tab" data-mode="concepts">Key concepts</button>
+        <button class="tab" data-mode="flashcards">Flashcards</button>
+        <button class="tab" data-mode="quiz">Practice quiz</button>
+      </div>
+      <div class="card mode" id="mode-summary">
+        <div class="pane-title">Summary</div>
+        <div class="summary">
+          <% result.summary.forEach((s) => { %><p><%- highlight(s, terms) %></p><% }) %>
+        </div>
+      </div>
+
+      <div class="card mode hidden" id="mode-concepts">
+        <div class="pane-title">Key concepts · click one for the teacher panel</div>
+        <table>
+          <% result.teacher.forEach((t) => { %>
+            <tr>
+              <td style="width:34%"><button class="chip" data-concept="<%= t.term %>"><%= t.term %></button></td>
+              <td class="muted small"><%- highlight(t.steps[0] || '', t.term) %></td>
+            </tr>
+          <% }) %>
+        </table>
+      </div>
+
+      <div class="mode hidden" id="mode-flashcards">
+        <div class="pane-title">Flashcards · click a card to flip it</div>
+        <div class="flashcards">
+          <% result.flashcards.forEach((f) => { %>
+            <div class="flashcard">
+              <div class="flashcard-inner">
+                <div class="flashcard-face"><%= f.front %><span class="hint">click to reveal</span></div>
+                <div class="flashcard-face back"><%= f.back %></div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="mode hidden" id="mode-quiz">
+        <div class="scorebar">
+          <div class="pane-title" style="margin:0">Practice quiz · instant feedback</div>
+          <div><span id="verdict" class="muted small"></span> <span class="badge">Score <b id="score">0 / <%= result.quiz.length %></b></span></div>
+        </div>
+        <% result.quiz.forEach((q, i) => { %>
+          <div class="card qcard" data-answer="<%= q.answer %>">
+            <div class="small muted">Question <%= i + 1 %></div>
+            <div class="question" style="font-size:18px"><%= q.question %></div>
+            <div class="options">
+              <% q.options.forEach((o) => { %><button type="button" class="choice" data-option="<%= o %>"><%= o %></button><% }) %>
+            </div>
+            <div class="qexplain hidden"><div class="explain">From your notes: <%- highlight(q.explanation, q.answer) %></div></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- RIGHT: teacher panel + session history -->
+  <div class="stack">
+    <% if (result && result.teacher.length) { %>
+      <div class="card">
+        <div class="pane-title">Explain like a teacher</div>
+        <% result.teacher.forEach((t, i) => { %>
+          <div class="teach <%= i === 0 ? '' : 'hidden' %>" data-term="<%= t.term %>">
+            <h3 style="margin-bottom:12px">Let's break down “<%= t.term %>”</h3>
+            <ol class="steps">
+              <% t.steps.forEach((s) => { %><li><%- highlight(s, t.term) %></li><% }) %>
+            </ol>
+          </div>
+        <% }) %>
+        <div class="chips" style="margin-top:6px">
+          <% result.teacher.forEach((t, i) => { %>
+            <button class="chip <%= i === 0 ? 'active' : '' %>" data-concept="<%= t.term %>"><%= t.term %></button>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+    <div class="card">
+      <div class="pane-title">Session history</div>
+      <% if (!history.length) { %><p class="muted small" style="margin:0">Your study kits will appear here.</p><% } %>
+      <% history.forEach((h, i) => { %>
+        <a class="history-item" href="/study?h=<%= i %>"><%= h.title %><small><%= h.at %></small></a>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<script src="/study.js"></script>
+<%- include('partials/footer') %>

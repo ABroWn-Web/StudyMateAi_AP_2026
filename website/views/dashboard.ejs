@@ -1,0 +1,72 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+<% const best = ratings.reduce((a, b) => (b.rating > a.rating ? b : a), ratings[0]); %>
+
+<div class="card hero">
+  <div class="page-head" style="margin:0">
+    <div>
+      <p class="muted" style="margin:0 0 6px">Welcome back,</p>
+      <h1><%= user.full_name %></h1>
+      <p class="muted" style="margin:6px 0 0">Best subject: <b><%= best.subject_name %></b> · <%= best.rating %> · <%= best.title_name %></p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="/study">Open the workspace</a>
+      <a class="btn" href="/duels?subject=<%= best.subject_id %>">♞ Start a duel</a>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-top:18px">
+  <a class="card" href="/notebook"><div class="stat-label">Mistakes due</div><div class="stat-value"><%= due %></div><div class="small muted">AI Mistake Notebook →</div></a>
+  <a class="card" href="/focus"><div class="stat-label">Focus this week</div><div class="stat-value"><%= focus.minutes %><span class="small muted"> min</span></div><div class="small muted">Pomodoro sessions →</div></a>
+  <a class="card" href="/focus"><div class="stat-label">Puzzles solved</div><div class="stat-value"><%= focus.puzzles %></div><div class="small muted">Chess brain breaks →</div></a>
+  <a class="card" href="/leaderboard?subject=<%= best.subject_id %>"><div class="stat-label">Best rating</div><div class="stat-value"><%= best.rating %></div><div class="small muted">Leaderboard →</div></a>
+</div>
+
+<h2 style="margin-top:28px">Your ratings</h2>
+<div class="grid grid-3">
+  <% ratings.forEach((r) => {
+       const pct = r.next_min ? Math.round(100 * (r.rating - r.cur_min) / (r.next_min - r.cur_min)) : 100; %>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b><%= r.subject_name %></b>
+        <span class="badge badge-<%= r.title_code %>"><%= r.title_code %></span>
+      </div>
+      <div class="stat-value"><%= r.rating %></div>
+      <div class="progress"><span style="width:<%= pct %>%"></span></div>
+      <div class="small muted" style="margin-top:6px">
+        <%= r.next_title ? (r.next_min - r.rating) + ' points to ' + r.next_title : 'Highest title reached' %>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h2>Weakest topics (last 30 days)</h2>
+    <% if (!weak.length) { %><p class="muted">Play a few quizzes to see your weak spots.</p><% } %>
+    <% weak.forEach((w) => { %>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between"><span><%= w.topic_name %></span><b><%= w.accuracy %>%</b></div>
+        <div class="progress"><span style="width:<%= w.accuracy %>%"></span></div>
+        <div class="small muted"><%= w.answered %> answers</div>
+      </div>
+    <% }) %>
+  </div>
+  <div class="card">
+    <h2>Recent duels</h2>
+    <% if (!duels.length) { %><p class="muted">No duels yet. <a href="/duels">Challenge someone!</a></p><% } %>
+    <table>
+      <% duels.forEach((d) => {
+           const won = (d.result === '1-0' && d.color === 'WHITE') || (d.result === '0-1' && d.color === 'BLACK');
+           const kind = d.result === '1/2-1/2' ? 'draw' : won ? 'win' : 'loss'; %>
+        <tr>
+          <td><span class="badge badge-<%= kind %>"><%= kind.toUpperCase() %></span></td>
+          <td>vs <b>@<%= d.opponent %></b></td>
+          <td class="<%= d.rating_change >= 0 ? 'up' : 'down' %>"><%= d.rating_change >= 0 ? '+' : '' %><%= d.rating_change %></td>
+          <td><a href="/duels/<%= d.duel_id %>">Scoresheet</a></td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
+</div>
+<%- include('partials/footer') %>
