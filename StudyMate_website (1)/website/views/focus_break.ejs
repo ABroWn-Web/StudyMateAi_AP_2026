@@ -1,0 +1,23 @@
+<%- include('partials/header', { title: 'Chess break' }) %>
+<div class="page-head">
+  <div><h1>Brain break ♞</h1><p class="muted">Find the winning move. Click a piece, then the square it should go to.</p></div>
+</div>
+<div class="grid grid-2">
+  <div class="card">
+    <div id="board" class="board" data-fen="<%= puzzle.fen %>"></div>
+  </div>
+  <div class="card">
+    <h2><%= puzzle.fen.split(' ')[1] === 'w' ? 'White' : 'Black' %> to move</h2>
+    <p><span class="badge"><%= puzzle.theme %></span> <span class="badge badge-FM">rated <%= puzzle.puzzle_rating %></span></p>
+    <form method="POST" action="/focus/break">
+      <input type="hidden" name="puzzle_id" value="<%= puzzle.puzzle_id %>">
+      <label>Your move</label>
+      <input id="move" name="move" placeholder="click the board, e.g. d1d8" required>
+      <br><br>
+      <button class="btn btn-primary btn-block">Play move & end session</button>
+    </form>
+    <p class="small muted">The session ends either way; solving it counts towards your puzzle stats.</p>
+  </div>
+</div>
+<script src="/board.js"></script>
+<%- include('partials/footer') %>

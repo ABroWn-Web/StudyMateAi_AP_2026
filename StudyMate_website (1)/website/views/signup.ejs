@@ -1,0 +1,30 @@
+<%- include('partials/header', { title: 'Sign up' }) %>
+<div class="card">
+  <div class="auth-logo">
+    <div class="logo-mark">♞</div>
+    <h1>Create your account</h1>
+    <p class="muted">You start at 1200 in every subject, like a new chess player.</p>
+  </div>
+  <% if (flash) { %><div class="flash flash-<%= flash.type %>"><%= flash.text %></div><% } %>
+  <form method="POST" action="/signup">
+    <label>Full name</label>
+    <input name="full_name" required>
+    <label>Username</label>
+    <input name="username" required pattern="[a-z0-9_]{3,30}" title="3-30 lowercase letters, digits or _">
+    <label>Email</label>
+    <input name="email" type="email" required>
+    <label>College</label>
+    <select name="college_id">
+      <option value="">— none —</option>
+      <% colleges.forEach((c) => { %>
+        <option value="<%= c.college_id %>"><%= c.college_name %>, <%= c.city %></option>
+      <% }) %>
+    </select>
+    <label>Password</label>
+    <input name="password" type="password" minlength="6" required>
+    <br><br>
+    <button class="btn btn-primary btn-block">Create account</button>
+  </form>
+  <p class="muted small" style="text-align:center">Already have an account? <a href="/login">Log in</a></p>
+</div>
+<%- include('partials/footer') %>

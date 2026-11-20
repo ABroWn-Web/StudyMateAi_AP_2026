@@ -1,0 +1,30 @@
+<%- include('partials/header', { title: 'Result' }) %>
+<div class="card hero">
+  <div class="page-head" style="margin:0">
+    <div>
+      <p class="muted" style="margin:0"><%= attempt.title %></p>
+      <h1 style="font-size:48px"><%= score.score %> / <%= score.answered %></h1>
+      <p class="muted" style="margin:0"><%= score.seconds %> seconds</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn" href="/quizzes?subject=<%= attempt.subject_id %>">More quizzes</a>
+      <a class="btn btn-primary" href="/notebook">Mistake notebook</a>
+    </div>
+  </div>
+</div>
+<div class="card" style="margin-top:18px">
+  <h2>Review</h2>
+  <table>
+    <tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th></th></tr>
+    <% review.forEach((r) => { %>
+      <tr>
+        <td class="rank"><%= r.position %></td>
+        <td><%= r.question_text %></td>
+        <td><%= r.my_answer || '— skipped —' %></td>
+        <td><%= r.correct_answer %></td>
+        <td><span class="badge badge-<%= r.was_correct ? 'win' : 'loss' %>"><%= r.was_correct ? '✓' : '✗' %></span></td>
+      </tr>
+    <% }) %>
+  </table>
+</div>
+<%- include('partials/footer') %>

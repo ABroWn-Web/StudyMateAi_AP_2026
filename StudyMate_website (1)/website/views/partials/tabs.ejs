@@ -1,0 +1,5 @@
+<div class="tabs">
+  <% subjects.forEach((s) => { %>
+    <a class="tab <%= s.subject_id === subject ? 'active' : '' %>" href="?subject=<%= s.subject_id %>"><%= s.subject_name %></a>
+  <% }) %>
+</div>

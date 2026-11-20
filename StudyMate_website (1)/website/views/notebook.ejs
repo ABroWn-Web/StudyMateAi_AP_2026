@@ -1,0 +1,32 @@
+<%- include('partials/header', { title: 'Mistake Notebook' }) %>
+<div class="page-head">
+  <div><h1>Mistake notebook</h1><p class="muted">Every wrong answer comes back on a schedule (Leitner boxes) until you know it.</p></div>
+</div>
+<div class="card">
+  <div class="boxes">
+    <% const when = { 1: 'tomorrow', 2: '3 days', 3: '7 days', 4: '14 days', 5: '30 days' }; %>
+    <% boxes.forEach((b) => { %>
+      <div class="box"><span class="small muted">Box <%= b.box %></span><b><%= b.n %></b><span class="small muted"><%= when[b.box] %></span></div>
+    <% }) %>
+  </div>
+</div>
+<h2 style="margin-top:24px">Due today (<%= dueTotal %>)</h2>
+<% if (!due.length) { %><div class="card"><p class="muted">Nothing due. Come back tomorrow.</p></div><% } %>
+<div class="grid grid-2">
+  <% due.forEach((m) => { %>
+    <div class="card">
+      <div class="small muted">Box <%= m.leitner_box %> · due <%= m.next_review_on.toDateString() %></div>
+      <div class="question" style="font-size:18px"><%= m.question_text %></div>
+      <details>
+        <summary>Show answer + AI explanation</summary>
+        <p><b>Answer:</b> <%= m.correct_answer %></p>
+        <div class="explain small"><%= m.ai_explanation %></div>
+      </details>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <form class="inline" method="POST" action="/notebook/<%= m.question_id %>/remembered"><button class="btn btn-good btn-sm">✓ I remembered</button></form>
+        <form class="inline" method="POST" action="/notebook/<%= m.question_id %>/forgot"><button class="btn btn-bad btn-sm">✗ Forgot</button></form>
+      </div>
+    </div>
+  <% }) %>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,38 @@
+<%- include('partials/header', { title: 'Focus' }) %>
+<div class="page-head">
+  <div><h1>Focus timer</h1><p class="muted">Study with a Pomodoro timer. Your break is a chess puzzle.</p></div>
+</div>
+<div class="grid grid-2">
+  <div class="card">
+    <% if (running) { %>
+      <div class="small muted" style="text-align:center"><%= running.subject_name %> · <%= running.planned_minutes %> min session</div>
+      <div id="timer" class="timer"
+           data-ends="<%= new Date(running.started_at).getTime() + running.planned_minutes * 60000 %>">--:--</div>
+      <a class="btn btn-primary btn-block" href="/focus/break">Take my chess break ♞</a>
+      <script src="/focus.js"></script>
+    <% } else { %>
+      <h2>Start a session</h2>
+      <form method="POST" action="/focus/start">
+        <label>Subject</label>
+        <select name="subject">
+          <% subjects.forEach((s) => { %><option value="<%= s.subject_id %>"><%= s.subject_name %></option><% }) %>
+        </select>
+        <label>Length</label>
+        <select name="minutes"><option value="25">25 minutes</option><option value="50">50 minutes</option></select>
+        <br><br>
+        <button class="btn btn-primary btn-block">Start focusing</button>
+      </form>
+    <% } %>
+  </div>
+  <div class="card">
+    <h2>This week</h2>
+    <% if (!stats.length) { %><p class="muted">No finished sessions this week.</p><% } %>
+    <table>
+      <% if (stats.length) { %><tr><th>Subject</th><th>Sessions</th><th>Minutes</th><th>Puzzles</th></tr><% } %>
+      <% stats.forEach((s) => { %>
+        <tr><td><%= s.subject_name %></td><td><%= s.sessions %></td><td><b><%= s.minutes %></b></td><td>♞ <%= s.puzzles %></td></tr>
+      <% }) %>
+    </table>
+  </div>
+</div>
+<%- include('partials/footer') %>
